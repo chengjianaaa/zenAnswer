@@ -1,0 +1,97 @@
+
+import java.util.HashMap;
+import java.util.Map;
+
+public class Chem {
+
+	static Map<String, Float> ps = new HashMap<String, Float>();
+	public static void main(String[] args) {
+		ps.put("H", 1.00794f);
+		ps.put("C", 12.011f);
+		ps.put("N", 14.00674f);
+		ps.put("O", 15.9994f);
+		ps.put("Fe", 55.845f);
+		
+		String input = "H2O";
+//		String input = "Fe3[Fe(CN)6]2";
+//		String input = "CH3(CH2)16CH3";
+		char[] t = input.toCharArray();
+		
+		System.out.println(find(t, 0, t.length));
+	}
+	
+	static float find(final char[] t, int start, int end){
+		float v = 0;
+		for(int i = start; i < end ;i++){
+			float curr = 0;
+			if(t[i] == '('){
+				int endIn = findEnd(t, i, ')');
+				curr = find(t, i + 1, endIn);
+				i = endIn;
+			}else if(t[i] == '['){
+				int endIn = findEnd(t, i, ']');
+				curr = find(t, i + 1, endIn);
+				i = endIn;
+			}else if(i < t.length - 1 && ps.containsKey(new String(t,i,2))){
+				curr = ps.get(new String(t,i,2));
+				i++;
+			}else if(ps.containsKey(new String(t,i,1))){
+				curr = ps.get(new String(t,i,1));
+			}
+			
+			int r = 1;
+			int rs = i;
+			while(i + 1 < t.length){
+				if(!isNum(t[i + 1])){
+					break;
+				}
+				i++;
+			}
+			if(rs < i){
+				r = Integer.parseInt(new String(t,rs + 1, i - rs));
+			}
+			v += (r * curr);
+			
+		}
+		//System.out.println(new String(t,start,end - start)+"===="+v);
+		return v;
+	}
+	
+	private static boolean isNum(char c){
+		if(c >= '1' && c <= '9'){
+			return true;
+		}
+		return false;
+	}
+
+	private static int findEnd(final char[] t, int start, char c) {
+		int count = 0;
+		for (int i = start + 1; i < t.length; i++) {
+			switch (t[i]) {
+			case '(':
+				if(c == t[i])
+					count++;
+				break;
+			case ')':
+				if(c== t[i] && count-- == 0){
+					return i ;
+				}
+				break;
+			case '[':
+				if(c == t[i])
+					count++;
+				break;
+			case ']':
+				if(c== t[i] && count-- == 0){
+					return i ;
+				}
+				break;
+			default:
+				break;
+			}
+		}
+		throw new RuntimeException("not found "+c);
+	}
+	
+	
+}
